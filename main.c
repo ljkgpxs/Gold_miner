@@ -2,6 +2,7 @@
 #include <SDL.h>
 #include <SDL2/SDL_image.h>
 #include <SDL_timer.h>
+#include <SDL2/SDL_ttf.h>
 
 #include "common.h"
 #include "gamemain.h"
@@ -23,6 +24,11 @@ int Init_SDL()
 
 	if(IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG) < 0) {
 		printf("SDL image initialize failed! %s\n", IMG_GetError());
+		return 0;
+	}
+
+	if(TTF_Init() == -1) {
+		printf("SDL ttf initialize failed! %s\n", TTF_GetError());
 		return 0;
 	}
 
@@ -54,7 +60,7 @@ SDL_Texture *loadTexture(const char *filePath)
 	return newTexture;
 }
 
-int circleToRect(SDL_Rect *rect, int x, int y, float radius)
+void circleToRect(SDL_Rect *rect, int x, int y, float radius)
 {
 	//rect->x = x > radius ? x - radius : 0;
 	//rect->y = y > radius ? y - radius : 0;
@@ -95,6 +101,7 @@ int readyAnimation()
 	buttonRect.x = 180;
 	buttonRect.y = 135;
 	buttonRect.w = 160;
+	buttonRect.h = 43;
 
 	while(running) {
 		startTime = SDL_GetTicks();
