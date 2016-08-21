@@ -45,8 +45,8 @@ void setGoal(int goal)
 		diaRect.h = 100;
 		textRect.x = 500;
 		textRect.y = 300;
-		textRect.w = 50;
-		textRect.h = 40;
+		textRect.w = 100;
+		textRect.h = 80;
 		SDL_RenderClear(winRenderer);
 		SDL_RenderCopy(winRenderer, goalBg, NULL, NULL);
 		SDL_RenderCopy(winRenderer, goalDia, NULL, &diaRect);
@@ -61,7 +61,7 @@ void setGoal(int goal)
 
 int startGame()
 {
-	gameFont = TTF_OpenFont("res/default.ttf", 45);
+	gameFont = TTF_OpenFont("res/default.ttf", 40);
 	setGoal(650);
 	return 1;
 }
