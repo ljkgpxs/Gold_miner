@@ -52,16 +52,16 @@ void setGoal(int goal)
 		SDL_RenderCopy(winRenderer, goalDia, NULL, &diaRect);
 		SDL_RenderCopy(winRenderer, goalGrade, NULL, &textRect);
 		SDL_RenderPresent(winRenderer);
-
-		SDL_DestroyTexture(goalBg);
-		SDL_DestroyTexture(goalDia);
-		SDL_DestroyTexture(goalGrade);
 	}
+	SDL_DestroyTexture(goalBg);
+	SDL_DestroyTexture(goalDia);
+	SDL_DestroyTexture(goalGrade);
+
 }
 
 int startGame()
 {
-	gameFont = TTF_OpenFont("default.ttf", 35);
+	gameFont = TTF_OpenFont("res/default.ttf", 45);
 	setGoal(650);
 	return 1;
 }
