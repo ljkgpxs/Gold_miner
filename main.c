@@ -88,9 +88,9 @@ int readyAnimation()
 	int mouseOver = 0;
 	Uint32 startTime;
 
-	light = loadTexture(imgFile[IMG_LIGHT]);
-	startBg = loadTexture(imgFile[IMG_STARTBG]);
-	startButton = loadTexture(imgFile[IMG_STARTBUTTON]);
+	light = loadTexture(imgFile[ID_LIGHT]);
+	startBg = loadTexture(imgFile[ID_STARTBG]);
+	startButton = loadTexture(imgFile[ID_STARTBUTTON]);
 	buttonClip[0].x = buttonClip[0].y = 0;
 	buttonClip[0].w = 160;
 	buttonClip[0].h = 43;
