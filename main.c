@@ -9,6 +9,8 @@
 #include "gamemain.h"
 #include "main.h"
 
+#define PRE_FRAME_TICKS		1000 / FPS
+
 int Init_SDL()
 {
 	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) < 0) {
@@ -46,8 +48,8 @@ void Close_SDL()
 	// printf("Close SDL\n");
 	SDL_DestroyRenderer(winRenderer);
 	SDL_DestroyWindow(win);
+	Mix_CloseAudio();
 	IMG_Quit();
-	Mix_Quit();
 	SDL_Quit();
 }
 
@@ -96,6 +98,7 @@ int readyAnimation()
 	int mouseOver = 0;
 	Uint32 startTime;
 	statusGame status = PROG_QUIT;
+//	Uint32 frames=0, frameTimer=0;
 
 	mouseIn = Mix_LoadWAV(sodFile[ID_MOUSEIN]);
 	light = loadTexture(imgFile[ID_LIGHT]);
@@ -115,6 +118,14 @@ int readyAnimation()
 
 	while(running) {
 		startTime = SDL_GetTicks();
+
+/*		if(frames == 120) {
+			printf("%f\n", 120.0 / ((SDL_GetTicks() - frameTimer) / 1000.0));
+			frameTimer = SDL_GetTicks();
+			frames = 0;
+		} else
+			frames++;
+*/
 		while(SDL_PollEvent(&keyEvent)) {
 			if(keyEvent.type == SDL_QUIT)
 				running = false;
@@ -160,7 +171,9 @@ int readyAnimation()
 			if(lightRadius < 170)
 				increase = true;
 		}
-		SDL_Delay(1000 / FPS - (SDL_GetTicks() - startTime));
+//		printf("Delay %d ", PRE_FRAME_TICKS - (SDL_GetTicks() - startTime));
+		if(PRE_FRAME_TICKS > (SDL_GetTicks() - startTime))
+			SDL_Delay(PRE_FRAME_TICKS - (SDL_GetTicks() - startTime));
 	}
 
 	SDL_DestroyTexture(light);
