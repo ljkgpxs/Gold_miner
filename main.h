@@ -17,3 +17,15 @@ const char imgFile[20][30] = {
 	"res/img/diaBg.png"
 };
 
+const char sodFile[20][30] = {
+	"res/sounds/mouseIn.wav",
+	"res/sounds/dig.mp3",
+	"res/sounds/explosive.wav",
+	"res/sounds/highValue.wav",
+	"res/sounds/lowValue.wav",
+	"res/sounds/norValue.wav",
+	"res/sounds/pull.wav",
+	"res/sounds/score1.wav",
+	"res/sounds/score2.wav"
+};
+

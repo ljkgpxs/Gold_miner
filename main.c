@@ -1,8 +1,9 @@
 #include <stdio.h>
 #include <SDL.h>
-#include <SDL2/SDL_image.h>
+#include <SDL_image.h>
 #include <SDL_timer.h>
-#include <SDL2/SDL_ttf.h>
+#include <SDL_ttf.h>
+#include <SDL_mixer.h>
 
 #include "common.h"
 #include "gamemain.h"
@@ -10,7 +11,7 @@
 
 int Init_SDL()
 {
-	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) < 0) {
+	if(SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO) < 0) {
 		printf("SDL initialize failed! %s\n", SDL_GetError());
 		return 0;
 	} else {
@@ -32,6 +33,11 @@ int Init_SDL()
 		return 0;
 	}
 
+	if(Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+		printf("SDL_mixer could not initialize! %s\n", Mix_GetError());
+		return 0;
+	}
+
 	return 1;
 }
 
@@ -41,6 +47,7 @@ void Close_SDL()
 	SDL_DestroyRenderer(winRenderer);
 	SDL_DestroyWindow(win);
 	IMG_Quit();
+	Mix_Quit();
 	SDL_Quit();
 }
 
@@ -83,11 +90,14 @@ int readyAnimation()
 {
 	SDL_Texture *light, *startBg, *startButton;
 	SDL_Rect lightRect, buttonRect, buttonClip[2];
+	Mix_Chunk *mouseIn;
 	float lightRadius = 200;
 	bool running = true, increase = false;
 	int mouseOver = 0;
 	Uint32 startTime;
+	statusGame status = PROG_QUIT;
 
+	mouseIn = Mix_LoadWAV(sodFile[ID_MOUSEIN]);
 	light = loadTexture(imgFile[ID_LIGHT]);
 	startBg = loadTexture(imgFile[ID_STARTBG]);
 	startButton = loadTexture(imgFile[ID_STARTBUTTON]);
@@ -112,14 +122,20 @@ int readyAnimation()
 				if(keyEvent.key.keysym.sym == SDLK_SPACE) {
 					SDL_DestroyTexture(light);
 					SDL_DestroyTexture(startBg);
-					return START_GAME;
+					status = START_GAME;
+					running = false;
 				}
 			if(keyEvent.type == SDL_MOUSEMOTION || keyEvent.type == SDL_MOUSEBUTTONDOWN) {
 				SDL_Point mouse;
 				SDL_GetMouseState(&mouse.x, &mouse.y);
 				if(mouseInside(mouse, buttonRect)) {
-					if(keyEvent.type == SDL_MOUSEBUTTONDOWN)
-						return START_GAME;
+					if(keyEvent.type == SDL_MOUSEBUTTONDOWN) {
+						status = START_GAME;
+						running = false;
+					}
+					if(mouseOver == 0) {
+						Mix_PlayChannel(-1, mouseIn, 0);
+					}
 					buttonRect.h = 55;
 					mouseOver = 1;
 				} else {
@@ -150,7 +166,8 @@ int readyAnimation()
 	SDL_DestroyTexture(light);
 	SDL_DestroyTexture(startBg);
 	SDL_DestroyTexture(startButton);
-	return PROG_QUIT;
+	Mix_FreeChunk(mouseIn);
+	return status;
 }
 
 int main(int argc, char **argv)
