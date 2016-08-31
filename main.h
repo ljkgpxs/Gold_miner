@@ -4,7 +4,7 @@ SDL_Window *win = NULL;
 SDL_Renderer *winRenderer = NULL;
 SDL_Event keyEvent;
 
-const char imgFile[20][30] = {
+const char imgFile[][30] = {
 	"res/img/startBg.jpg",
 	"res/img/light.png",
 	"res/img/startButton.png",
@@ -14,10 +14,11 @@ const char imgFile[20][30] = {
 	"res/img/gold.png",
 	"res/img/bag.png",
 	"res/img/goalDia.png",
-	"res/img/diaBg.png"
+	"res/img/diaBg.png",
+	"res/img/gameBg.png"
 };
 
-const char sodFile[20][30] = {
+const char sodFile[][30] = {
 	"res/sounds/mouseIn.wav",
 	"res/sounds/dig.mp3",
 	"res/sounds/explosive.wav",

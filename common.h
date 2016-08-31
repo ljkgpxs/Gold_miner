@@ -6,7 +6,7 @@
 #define SCREEN_H	544
 
 #define	FPS		60
-
+#define PRE_FRAME_TICKS	1000 / FPS
 enum statusGame{
 	PROG_QUIT,
 	START_GAME
@@ -22,7 +22,8 @@ enum resImgId {
 	ID_GOLD,
 	ID_BAG,
 	ID_GOALDIA,
-	ID_GOALBG
+	ID_GOALBG,
+	ID_GAMEBG
 };
 
 enum resSoundId {
