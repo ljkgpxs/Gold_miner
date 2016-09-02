@@ -8,8 +8,9 @@
 
 TTF_Font *gameFont = NULL;
 SDL_Color fontColor = { 0x21, 0xd0, 0x1d };
+int userGrade = 0;
 
-SDL_Texture *loadRenderText(char *text, SDL_Color color)
+SDL_Texture *loadRenderText(const char *text, SDL_Color color)
 {
 	SDL_Surface *textSurface = TTF_RenderText_Solid(gameFont, text, color);
 	if(textSurface == NULL) {
@@ -22,7 +23,8 @@ SDL_Texture *loadRenderText(char *text, SDL_Color color)
 
 unsigned int getNumDigit(int num)
 {
-	unsigned int count;
+	if(num == 0) return 1;
+	unsigned int count = 0;
 	while(num) {
 		num /= 10;
 		count++;
@@ -50,7 +52,7 @@ void setGoal(int goal)
 	diaRect.h = 340;
 	textRect.x = SCREEN_W / 2;
 	textRect.y = SCREEN_H / 2 - 30;
-	textRect.w = 25 * getNumDigit(goal);
+	textRect.w = 20 * (getNumDigit(goal) + 1);
 	textRect.h = 70;
 	while(running) {
 		startTime = SDL_GetTicks();
@@ -98,22 +100,24 @@ void destroyLevel(levelInfo *lvl)
 {
 	free(lvl->reses);
 	free(lvl);
+	lvl = NULL;
 }
 int gameMain(levelInfo *level)
 {
-	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture, *levelTexture, *goalTexture;
-	SDL_Rect resRect[level->totalRes], timeRect, levelRect, goalRect;
-	int grade = level->userGrade, startTime, levelTime;
+	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture, *levelTexture, *goalTexture, *gradeTexture;
+	SDL_Rect resRect[level->totalRes], timeRect, levelRect, goalRect, gradeRect;
+	int startTime, levelTime;
 	bool running = true;
 	levelTime = SDL_GetTicks();
 	char levelStr[4] = { 0 };
 	char goalStr[10] = { 0 };
+
 	goalStr[0] = '$';
 
 	gameBg = loadTexture(imgFile[ID_GAMEBG]);
 	levelTexture = loadRenderText(SDL_itoa(level->level, levelStr, 10), fontColor);
 	SDL_itoa(level->levelGoal, &goalStr[1], 10);
-	goalTexture = loadRenderText( goalStr, fontColor);
+	goalTexture = loadRenderText(goalStr, fontColor);
 	for(int i = 0; i < level->totalRes; i++) {
 		resTexture[i] = loadTexture(imgFile[level->reses[i].id]);
 		resRect[i].x = level->reses[i].position.x;
@@ -127,11 +131,14 @@ int gameMain(levelInfo *level)
 	levelRect.w = 13 * getNumDigit(level->level);
 	levelRect.h = 45;
 	goalRect.x = 125; goalRect.y = 80;
-	goalRect.w = 10 * getNumDigit(level->levelGoal);
+	goalRect.w = 15 * (1 + getNumDigit(level->levelGoal));
 	goalRect.h = 45;
+	gradeRect.x = 130; gradeRect.y = 20;
+	gradeRect.h = 45;
 
 	while(running) {
 		char timeStr[2] = { 0 };
+		char gradeStr[10] = { 0 };
 		startTime = SDL_GetTicks();
 		if((startTime - levelTime) / 1000 > 60)
 			running = false;
@@ -139,6 +146,11 @@ int gameMain(levelInfo *level)
 			if(keyEvent.type == SDL_QUIT)
 				running = false;
 		}
+
+		gradeStr[0] = '$';
+		SDL_itoa(userGrade, &gradeStr[1], 10);
+		gradeTexture = loadRenderText(gradeStr, fontColor);
+		gradeRect.w = 15 * (getNumDigit(userGrade) + 1);;
 
 		if(timeTexture)
 			SDL_DestroyTexture(timeTexture);
@@ -148,6 +160,7 @@ int gameMain(levelInfo *level)
 		SDL_RenderCopy(winRenderer, levelTexture, NULL, &levelRect);
 		SDL_RenderCopy(winRenderer, timeTexture, NULL, &timeRect);
 		SDL_RenderCopy(winRenderer, goalTexture, NULL, &goalRect);
+		SDL_RenderCopy(winRenderer, gradeTexture, NULL, &gradeRect);
 		for(int i = 0; i < level->totalRes; i++) {
 			SDL_RenderCopy(winRenderer, resTexture[i], NULL, &resRect[i]);
 		}
@@ -161,16 +174,39 @@ int gameMain(levelInfo *level)
 	SDL_DestroyTexture(gameBg);
 	SDL_DestroyTexture(timeTexture);
 	SDL_DestroyTexture(levelTexture);
-	return grade;
+	return userGrade;
+}
+
+void gameOver(bool win)
+{
+	// Incomplete function
+	if(win)
+		printf("You Win %d\n", userGrade);
+	else
+		printf("You Lose %d\n", userGrade);
 }
 
 int startGame()
 {
+	int lvlNum = 1;
+	bool win = false;
+	levelInfo *lvl = NULL;
 	gameFont = TTF_OpenFont("res/default.ttf", 40);
-	levelInfo *lvl = getLevel(1);
-	setGoal(lvl->levelGoal);
-	gameMain(lvl);
-	destroyLevel(lvl);
+	
+	while(1) {
+		lvl = getLevel(lvlNum++);
+		if(!lvl) {
+			win = true;
+			gameOver(win);
+			break;
+		}
+		setGoal(lvl->levelGoal);
+		if(gameMain(lvl) <= lvl->levelGoal) {
+			gameOver(win);
+			break;
+		}
+		destroyLevel(lvl);
+	}
 	return 1;
 }
 

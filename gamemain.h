@@ -14,7 +14,6 @@ struct resPos {
 struct levelInfo {
 	int level;
 	int levelGoal;
-	int userGrade;
 	int totalRes;
 	struct resPos *reses;
 };
