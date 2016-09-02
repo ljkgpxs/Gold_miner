@@ -4,26 +4,7 @@
 #include <SDL_ttf.h>
 
 #include "common.h"
-
-#define MAXRES	30;
-
-extern SDL_Texture *loadTexture(const char *filePath);
-
-struct resPos {
-	int id;
-	SDL_Point position;
-};
-
-struct levelInfo {
-	int level;
-	int levelGoal;
-	int userGrade;
-	int totalRes;
-	struct resPos *reses;
-};
-
-typedef struct resPos	resPos;
-typedef struct levelInfo	levelInfo;
+#include "gamemain.h"
 
 TTF_Font *gameFont = NULL;
 SDL_Color fontColor = { 0x21, 0xd0, 0x1d };
@@ -39,7 +20,7 @@ SDL_Texture *loadRenderText(char *text, SDL_Color color)
 	return SDL_CreateTextureFromSurface(winRenderer, textSurface);
 }
 
-inline unsigned int getNumDigit(int num)
+unsigned int getNumDigit(int num)
 {
 	unsigned int count;
 	while(num) {
@@ -99,7 +80,7 @@ levelInfo *getLevel(int lvl)
 {
 	if(lvl == 1) {
 		levelInfo *currentLvl = (levelInfo *)malloc(sizeof(levelInfo));
-		currentLvl->level = 200;
+		currentLvl->level = lvl;
 		currentLvl->levelGoal = 650;
 		currentLvl->totalRes = 2;
 		resPos *res = (resPos *)malloc(sizeof(resPos) * 2);;
@@ -113,6 +94,11 @@ levelInfo *getLevel(int lvl)
 	return NULL;
 }
 
+void destroyLevel(levelInfo *lvl)
+{
+	free(lvl->reses);
+	free(lvl);
+}
 int gameMain(levelInfo *level)
 {
 	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture, *levelTexture, *goalTexture;
@@ -184,6 +170,7 @@ int startGame()
 	levelInfo *lvl = getLevel(1);
 	setGoal(lvl->levelGoal);
 	gameMain(lvl);
+	destroyLevel(lvl);
 	return 1;
 }
 

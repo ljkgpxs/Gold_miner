@@ -15,7 +15,7 @@ int Init_SDL()
 		printf("SDL initialize failed! %s\n", SDL_GetError());
 		return 0;
 	} else {
-		win = SDL_CreateWindow("", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_W, SCREEN_H, SDL_WINDOW_SHOWN);
+		win = SDL_CreateWindow("Gold Miner", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_W, SCREEN_H, SDL_WINDOW_SHOWN);
 		winRenderer = SDL_CreateRenderer(win, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 		if(winRenderer == NULL) {
 			printf("Failed to create window renderer! %s\n", SDL_GetError());
