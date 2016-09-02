@@ -183,10 +183,14 @@ int readyAnimation()
 
 int main(int argc, char **argv)
 {
+	SDL_Surface *icon;
 	if(!Init_SDL()) {
 		return 1;
 	}
 	
+	icon = IMG_Load("res/img/icon.png");
+	SDL_SetWindowIcon(win, icon);
+
 	atexit(Close_SDL);
 
 	if(readyAnimation() == PROG_QUIT) {
@@ -195,6 +199,7 @@ int main(int argc, char **argv)
 		startGame();
 	}
 
+	SDL_FreeSurface(icon);
 	return 0;
 }
 
