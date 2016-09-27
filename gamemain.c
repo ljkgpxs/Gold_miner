@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <math.h>
 
 #include "common.h"
 #include "gamemain.h"
@@ -32,14 +33,23 @@ unsigned int getNumDigit(int num)
 	return count;
 }
 
+bool rectImpact(SDL_Rect a, SDL_Rect b)
+{
+	
+	if((abs((a.x + a.w / 2) - (b.x + b.w / 2)) <= a.w / 2 + b.w / 2) && abs((a.y + a.h / 2) - (b.y + b.h / 2)) <= a.h / 2 + b.h / 2)
+		return true;
+	else
+		return false;
+}
+
 void setGoal(int goal)
 {
 	bool running = true;
 	char goalString[10];
 	SDL_Texture *goalDia, *goalGrade, *goalBg;
-	SDL_Rect diaRect, textRect;
+	SDL_Rect diaRect, textRect, hookRect;
 	Uint32 startTime, frames;
-	
+
 	goalDia = loadTexture(imgFile[ID_GOALDIA]);
 	goalBg = loadTexture(imgFile[ID_GOALBG]);
 	goalString[0] = '$';
@@ -54,6 +64,7 @@ void setGoal(int goal)
 	textRect.y = SCREEN_H / 2 - 30;
 	textRect.w = 20 * (getNumDigit(goal) + 1);
 	textRect.h = 70;
+
 	while(running) {
 		startTime = SDL_GetTicks();
 		while(SDL_PollEvent(&keyEvent)) {
@@ -102,20 +113,25 @@ void destroyLevel(levelInfo *lvl)
 	free(lvl);
 	lvl = NULL;
 }
+
 int gameMain(levelInfo *level)
 {
-	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture, *levelTexture, *goalTexture, *gradeTexture;
-	SDL_Rect resRect[level->totalRes], timeRect, levelRect, goalRect, gradeRect;
-	int startTime, levelTime;
-	bool running = true;
+	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture, *levelTexture, *goalTexture, *gradeTexture, *hook;
+	SDL_Rect resRect[level->totalRes], timeRect, levelRect, goalRect, gradeRect, hookRect;
+	SDL_Point minerPin;
+	int startTime, levelTime, hookTimer;
+	bool running = true, hookDown = false, hookGoRight = true;
 	levelTime = SDL_GetTicks();
 	char levelStr[4] = { 0 };
 	char goalStr[10] = { 0 };
+	double hookAngle = 20;
 
 	goalStr[0] = '$';
 
 	gameBg = loadTexture(imgFile[ID_GAMEBG]);
 	levelTexture = loadRenderText(SDL_itoa(level->level, levelStr, 10), fontColor);
+	hook = loadTexture(imgFile[ID_HOOK]);
+
 	SDL_itoa(level->levelGoal, &goalStr[1], 10);
 	goalTexture = loadRenderText(goalStr, fontColor);
 	for(int i = 0; i < level->totalRes; i++) {
@@ -125,6 +141,8 @@ int gameMain(levelInfo *level)
 		SDL_QueryTexture(resTexture[i], NULL, NULL, &resRect[i].w, &resRect[i].h);
 	}
 
+	minerPin.x = 480;
+	minerPin.y = 120;
 	timeRect.x = 850; timeRect.y = 20;
 	timeRect.w = 26; timeRect.h = 40;
 	levelRect.x = 850; levelRect.y = 80;
@@ -135,6 +153,7 @@ int gameMain(levelInfo *level)
 	goalRect.h = 45;
 	gradeRect.x = 130; gradeRect.y = 20;
 	gradeRect.h = 45;
+	hookTimer = 0;
 
 	while(running) {
 		char timeStr[2] = { 0 };
@@ -147,6 +166,25 @@ int gameMain(levelInfo *level)
 				running = false;
 		}
 
+		if(!hookDown) {
+			if(SDL_GetTicks() - hookTimer > 20) {
+				hookTimer = SDL_GetTicks();
+				if(hookGoRight) {
+					hookAngle += 1;
+					if(hookAngle >= 160)
+						hookGoRight = false;
+				} else {
+					hookAngle -= 1;
+					if(hookAngle <= 20)
+						hookGoRight = true;
+				}
+			}
+
+		}
+
+//		printf("%.0f ", hookAngle);
+//		fflush(stdout);
+//
 		gradeStr[0] = '$';
 		SDL_itoa(userGrade, &gradeStr[1], 10);
 		gradeTexture = loadRenderText(gradeStr, fontColor);
