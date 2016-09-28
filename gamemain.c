@@ -47,7 +47,7 @@ void setGoal(int goal)
 	bool running = true;
 	char goalString[10];
 	SDL_Texture *goalDia, *goalGrade, *goalBg;
-	SDL_Rect diaRect, textRect, hookRect;
+	SDL_Rect diaRect, textRect;
 	Uint32 startTime, frames;
 
 	goalDia = loadTexture(imgFile[ID_GOALDIA]);
@@ -118,9 +118,9 @@ int gameMain(levelInfo *level)
 {
 	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture, *levelTexture, *goalTexture, *gradeTexture, *hook;
 	SDL_Rect resRect[level->totalRes], timeRect, levelRect, goalRect, gradeRect, hookRect;
-	SDL_Point minerPin;
+	SDL_Point minerPin, hookPin;
 	int startTime, levelTime, hookTimer;
-	bool running = true, hookDown = false, hookGoRight = true;
+	bool running = true, hookDown = false, hookGoRight = true, hookBack = false;
 	levelTime = SDL_GetTicks();
 	char levelStr[4] = { 0 };
 	char goalStr[10] = { 0 };
@@ -155,6 +155,12 @@ int gameMain(levelInfo *level)
 	gradeRect.h = 45;
 	hookTimer = 0;
 
+	SDL_QueryTexture(hook, NULL, NULL, &hookRect.w, &hookRect.h);
+	hookRect.x = minerPin.x - hookRect.w;
+	hookRect.y = minerPin.y - hookRect.h + 50;
+	hookPin.x = hookRect.w / 2;
+	hookPin.y = 0;
+
 	while(running) {
 		char timeStr[2] = { 0 };
 		char gradeStr[10] = { 0 };
@@ -164,22 +170,24 @@ int gameMain(levelInfo *level)
 		while(SDL_PollEvent(&keyEvent)) {
 			if(keyEvent.type == SDL_QUIT)
 				running = false;
+			if(keyEvent.type == SDL_KEYDOWN)
+				if(keyEvent.key.keysym.sym == SDLK_DOWN && !hookDown)
+					hookDown = true;
 		}
 
 		if(!hookDown) {
-			if(SDL_GetTicks() - hookTimer > 20) {
+			if(SDL_GetTicks() - hookTimer > 17) {
 				hookTimer = SDL_GetTicks();
 				if(hookGoRight) {
 					hookAngle += 1;
-					if(hookAngle >= 160)
+					if(hookAngle >= 150)
 						hookGoRight = false;
 				} else {
 					hookAngle -= 1;
-					if(hookAngle <= 20)
+					if(hookAngle <= 30)
 						hookGoRight = true;
 				}
 			}
-
 		}
 
 //		printf("%.0f ", hookAngle);
@@ -199,6 +207,8 @@ int gameMain(levelInfo *level)
 		SDL_RenderCopy(winRenderer, timeTexture, NULL, &timeRect);
 		SDL_RenderCopy(winRenderer, goalTexture, NULL, &goalRect);
 		SDL_RenderCopy(winRenderer, gradeTexture, NULL, &gradeRect);
+		SDL_RenderCopyEx(winRenderer, hook, NULL, &hookRect, 90 - hookAngle, &hookPin, SDL_FLIP_NONE);
+
 		for(int i = 0; i < level->totalRes; i++) {
 			SDL_RenderCopy(winRenderer, resTexture[i], NULL, &resRect[i]);
 		}
