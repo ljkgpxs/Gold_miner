@@ -120,6 +120,7 @@ int gameMain(levelInfo *level)
 	SDL_Rect resRect[level->totalRes], timeRect, levelRect, goalRect, gradeRect, hookRect;
 	SDL_Point minerPin, hookPin;
 	int startTime, levelTime, hookTimer;
+	int lineLen = 0, catchedRes = 0;
 	bool running = true, hookDown = false, hookGoRight = true, hookBack = false;
 	levelTime = SDL_GetTicks();
 	char levelStr[4] = { 0 };
@@ -213,6 +214,16 @@ int gameMain(levelInfo *level)
 			SDL_RenderCopy(winRenderer, resTexture[i], NULL, &resRect[i]);
 		}
 		SDL_RenderPresent(winRenderer);
+
+		for(int i = 0; i < level->totalRes; i++) {
+			if(rectImpact(hookRect, resRect[i])) {
+				catchedRes = i;
+				hookBack = true;
+				printf("Catched!\n");
+				break;
+			}
+		}
+
 		SDL_Delay(PRE_FRAME_TICKS - (SDL_GetTicks() - startTime));
 	}
 

@@ -16,7 +16,8 @@ const char imgFile[][30] = {
 	"res/img/goalDia.png",
 	"res/img/diaBg.png",
 	"res/img/gameBg.png",
-	"res/img/hook.png"
+	"res/img/hook.png",
+	"res/img/line.png"
 };
 
 const char sodFile[][30] = {

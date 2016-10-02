@@ -24,7 +24,8 @@ enum resImgId {
 	ID_GOALDIA,
 	ID_GOALBG,
 	ID_GAMEBG,
-	ID_HOOK
+	ID_HOOK,
+	ID_LINE
 };
 
 enum resSoundId {
