@@ -81,8 +81,9 @@ void setGoal(int goal)
 
 		if(++frames >= FPS * 2)
 			running = false;
-
+#ifndef _WIN32
 		SDL_Delay(1000 / FPS - (SDL_GetTicks() -  startTime));
+#endif
 	}
 	SDL_DestroyTexture(goalBg);
 	SDL_DestroyTexture(goalDia);
@@ -163,7 +164,7 @@ int gameMain(levelInfo *level)
 	hookPin.y = 0;
 
 	while(running) {
-		char timeStr[2] = { 0 };
+		char timeStr[3] = { 0 };
 		char gradeStr[10] = { 0 };
 		startTime = SDL_GetTicks();
 		if((startTime - levelTime) / 1000 > 60)
@@ -223,8 +224,10 @@ int gameMain(levelInfo *level)
 				break;
 			}
 		}
+#ifndef _WIN32
 
 		SDL_Delay(PRE_FRAME_TICKS - (SDL_GetTicks() - startTime));
+#endif
 	}
 
 	for(int i = 0; i < level->totalRes; i++) {
