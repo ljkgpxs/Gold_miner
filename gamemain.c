@@ -33,10 +33,10 @@ unsigned int getNumDigit(int num)
 	return count;
 }
 
-bool rectImpact(SDL_Rect a, SDL_Rect b)
+bool rectImpact(SDL_Rect a, SDL_Rect b, float alw)
 {
 	
-	if((abs((a.x + a.w / 2) - (b.x + b.w / 2)) <= a.w / 2 + b.w / 2) && abs((a.y + a.h / 2) - (b.y + b.h / 2)) <= a.h / 2 + b.h / 2)
+	if((abs((a.x + a.w / 2) - (b.x + b.w / 2)) <= (a.w / 2 + b.w / 2) / alw) && abs((a.y + a.h / 2) - (b.y + b.h / 2)) <= (a.h / 2 + b.h / 2) / alw)
 		return true;
 	else
 		return false;
@@ -156,6 +156,9 @@ int gameMain(levelInfo *level)
 	gradeRect.x = 130; gradeRect.y = 20;
 	gradeRect.h = 45;
 	hookTimer = 0;
+	lineTimer = 0;
+	lineLen = 1;
+	catchedRes = -1;
 
 	SDL_QueryTexture(hook, NULL, NULL, &hookRect.w, &hookRect.h);
 	hookRect.x = minerPin.x - hookRect.w;
@@ -193,8 +196,24 @@ int gameMain(levelInfo *level)
 		} else {
 			if(SDL_GetTicks() - lineTimer > 20) {
 				lineTimer - SDL_GetTicks();
-				lineLen++;
+				if(!hookBack)
+					lineLen += 2;
+				else lineLen -= 3;
 			}
+			if(lineLen <= 1) {
+				hookDown = false;
+				hookBack = false;
+			}
+			if(lineLen >= 500)
+				hookBack = true;
+			if(hookAngle <= 90) {
+				hookRect.x = minerPin.x - hookRect.w - abs(cos(hookAngle / 180.0 * M_PI) * lineLen);
+				hookRect.y = minerPin.y + abs(sin(hookAngle / 180.0 * M_PI) * lineLen);
+			} else {
+				hookRect.x = minerPin.x - hookRect.w + abs(cos(hookAngle / 180.0 * M_PI) * lineLen);
+				hookRect.y = minerPin.y + abs(sin(hookAngle / 180.0 * M_PI) * lineLen);
+			}
+//			printf("Y : %d    %f %f %f\n", hookRect.y, hookAngle, cos(90), sin(hookAngle) * lineLen);
 		}
 
 //		printf("%.0f ", hookAngle);
@@ -217,12 +236,13 @@ int gameMain(levelInfo *level)
 		SDL_RenderCopyEx(winRenderer, hook, NULL, &hookRect, 90 - hookAngle, &hookPin, SDL_FLIP_NONE);
 
 		for(int i = 0; i < level->totalRes; i++) {
-			SDL_RenderCopy(winRenderer, resTexture[i], NULL, &resRect[i]);
+			if(resTexture[i])
+				SDL_RenderCopy(winRenderer, resTexture[i], NULL, &resRect[i]);
 		}
 		SDL_RenderPresent(winRenderer);
 
 		for(int i = 0; i < level->totalRes; i++) {
-			if(rectImpact(hookRect, resRect[i])) {
+			if(rectImpact(hookRect, resRect[i], 1.5)) {
 				catchedRes = i;
 				hookBack = true;
 				printf("Catched!\n");
@@ -236,7 +256,8 @@ int gameMain(levelInfo *level)
 	}
 
 	for(int i = 0; i < level->totalRes; i++) {
-		SDL_DestroyTexture(resTexture[i]);
+		if(resTexture[i])
+			SDL_DestroyTexture(resTexture[i]);
 	}
 	SDL_DestroyTexture(gameBg);
 	SDL_DestroyTexture(timeTexture);
