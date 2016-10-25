@@ -120,7 +120,7 @@ int gameMain(levelInfo *level)
 	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture, *levelTexture, *goalTexture, *gradeTexture, *hook;
 	SDL_Rect resRect[level->totalRes], timeRect, levelRect, goalRect, gradeRect, hookRect;
 	SDL_Point minerPin, hookPin;
-	int startTime, levelTime, hookTimer;
+	int startTime, levelTime, hookTimer, lineTimer;
 	int lineLen = 0, catchedRes = 0;
 	bool running = true, hookDown = false, hookGoRight = true, hookBack = false;
 	levelTime = SDL_GetTicks();
@@ -189,6 +189,11 @@ int gameMain(levelInfo *level)
 					if(hookAngle <= 30)
 						hookGoRight = true;
 				}
+			}
+		} else {
+			if(SDL_GetTicks() - lineTimer > 20) {
+				lineTimer - SDL_GetTicks();
+				lineLen++;
 			}
 		}
 
