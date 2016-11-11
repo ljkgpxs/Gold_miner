@@ -1,6 +1,7 @@
 #pragma once
 
 #include <SDL.h>
+#include "common.h"
 
 #define MAXRES	30;
 
