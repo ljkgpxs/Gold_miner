@@ -8,6 +8,8 @@
 #include "gamemain.h"
 #include "resProperties.h"
 
+#define abs(x) (x > 0 ? x : (-x))
+
 TTF_Font *gameFont = NULL;
 SDL_Color fontColor = { 0x21, 0xd0, 0x1d };
 int userGrade = 0;
@@ -36,8 +38,14 @@ unsigned int getNumDigit(int num)
 
 bool rectImpact(SDL_Rect a, SDL_Rect b, float alw)
 {
-
-	if((abs((a.x + a.w / 2) - (b.x + b.w / 2)) <= (a.w / 2 + b.w / 2) / alw) && abs((a.y + a.h / 2) - (b.y + b.h / 2)) <= (a.h / 2 + b.h / 2) / alw)
+	SDL_Point r1, r2;
+	r1.x = a.x + a.w / 2;
+	r1.y = a.y + a.h / 2;
+	r2.x = b.x + b.w / 2;
+	r2.y = b.y + b.h / 2;
+	float r = sqrt((r1.x - r2.x)*(r1.x - r2.x) + (r1.y - r2.y)*(r1.y - r2.y));
+	//if((abs((a.x + a.w / 2) - (b.x + b.w / 2)) <= (a.w / 2 + b.w / 2) / alw) && abs((a.y + a.h / 2) - (b.y + b.h / 2)) <= (a.h / 2 + b.h / 2) / alw)
+	if( r <= (a.w + b.w) / (2.0 * alw) && r <= (a.h + b.h) / (2.0 * alw))
 		return true;
 	else
 		return false;
@@ -49,8 +57,8 @@ void setGoal(int goal)
 	char goalString[10];
 	SDL_Texture *goalDia, *goalGrade, *goalBg;
 	SDL_Rect diaRect, textRect;
-	Uint32 frames, startTime;
-	
+	Uint32 frames;
+
 	goalDia = loadTexture(imgFile[ID_GOALDIA]);
 	goalBg = loadTexture(imgFile[ID_GOALBG]);
 	goalString[0] = '$';
@@ -67,8 +75,6 @@ void setGoal(int goal)
 	textRect.h = 70;
 
 	while(running) {
-		startTime = SDL_GetTicks();
-//		printf("Loop %d %d\n", frames, startTime);
 		while(SDL_PollEvent(&keyEvent)) {
 			if(keyEvent.type == SDL_QUIT) {
 				running = false;
@@ -83,7 +89,7 @@ void setGoal(int goal)
 
 		if(++frames >= FPS * 2)
 			running = false;
-		SDL_Delay(1000 / FPS - (SDL_GetTicks() -  startTime));
+		//SDL_Delay(1000 / FPS - (SDL_GetTicks() -  startTime));
 	}
 	SDL_DestroyTexture(goalBg);
 	SDL_DestroyTexture(goalDia);
@@ -98,10 +104,10 @@ levelInfo *getLevel(int lvl)
 		currentLvl->levelGoal = 500;
 		currentLvl->totalRes = 2;
 		resPos *res = (resPos *)malloc(sizeof(resPos) * 2);;
-		res[0].id = ID_GOLD;
-		res[0].position.x = 100; res[0].position.y = 300;
-		res[1].id = ID_BSTONE;
-		res[1].position.x = 600; res[1].position.y = 400;
+		res[0].id = ID_SSTONE;
+		res[0].position.x = 600; res[0].position.y = 300;
+		res[1].id = ID_DIAMOND;
+		res[1].position.x = 100; res[1].position.y = 400;
 		currentLvl->reses = res;
 		return currentLvl;
 	}
@@ -117,7 +123,7 @@ void destroyLevel(levelInfo *lvl)
 
 int gameMain(levelInfo *level)
 {
-	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture, *levelTexture, *goalTexture, *gradeTexture, *hook, *line;
+	SDL_Texture *gameBg, *resTexture[level->totalRes], *timeTexture = NULL, *levelTexture, *goalTexture, *gradeTexture, *hook, *line;
 	SDL_Rect resRect[level->totalRes], timeRect, levelRect, goalRect, gradeRect, hookRect, lineRect;
 	SDL_Point minerPin, hookPin, linePin;
 	resProperties resProp;
@@ -164,14 +170,14 @@ int gameMain(levelInfo *level)
 
 	SDL_QueryTexture(hook, NULL, NULL, &hookRect.w, &hookRect.h);
 	hookRect.x = minerPin.x - hookRect.w;
-	hookRect.y = minerPin.y - hookRect.h + 50;
+	hookRect.y = minerPin.y - 20;
 	hookPin.x = hookRect.w / 2;
 	hookPin.y = 0;
 	lineRect.x = minerPin.x - hookRect.w / 2;
-	lineRect.y = minerPin.y - hookRect.h + 60;
+	lineRect.y = minerPin.y - 20;
 	lineRect.h = 0;
 	lineRect.w = 3;
-	linePin.x = lineRect.w / 2;
+	linePin.x = 2;
 	linePin.y = 0;
 
 	while(running) {
@@ -193,11 +199,11 @@ int gameMain(levelInfo *level)
 				hookTimer = SDL_GetTicks();
 				if(hookGoRight) {
 					hookAngle += 1.5;
-					if(hookAngle >= 150)
+					if(hookAngle >= 165)
 						hookGoRight = false;
 				} else {
 					hookAngle -= 1.5;
-					if(hookAngle <= 30)
+					if(hookAngle <= 15)
 						hookGoRight = true;
 				}
 			}
@@ -214,11 +220,11 @@ int gameMain(levelInfo *level)
 					lineLen -= 6 / resProp.getWeight();
 					if(hookAngle <= 90) {
 						resRect[catchedRes].x = hookRect.x - resRect[catchedRes].w / 2;
-						resRect[catchedRes].y = hookRect.y - resRect[catchedRes].h / 2 + 30;
+						resRect[catchedRes].y = hookRect.y - resRect[catchedRes].h / 2 + 35;
 						//printf("%f, %d, %d\n", resProp.getAlw() * 100, resRect[catchedRes].x, hookRect.x);
 					} else {
-						resRect[catchedRes].x = hookRect.x + resRect[catchedRes].w / 2;
-						resRect[catchedRes].y = hookRect.y - resRect[catchedRes].h / 2 + 30;
+						resRect[catchedRes].x = hookRect.x + resRect[catchedRes].w / 2 - 30;
+						resRect[catchedRes].y = hookRect.y - resRect[catchedRes].h / 2 + 35;
 					}
 				}
 				if(lineLen < 0)
@@ -241,10 +247,10 @@ int gameMain(levelInfo *level)
 				hookBack = true;
 			if(hookAngle <= 90) {
 				hookRect.x = minerPin.x - hookRect.w - abs(cos(hookAngle / 180.0 * M_PI) * lineLen);
-				hookRect.y = minerPin.y + abs(sin(hookAngle / 180.0 * M_PI) * lineLen);
+				hookRect.y = minerPin.y + abs(sin(hookAngle / 180.0 * M_PI) * lineLen) - 20;
 			} else {
 				hookRect.x = minerPin.x - hookRect.w + abs(cos(hookAngle / 180.0 * M_PI) * lineLen);
-				hookRect.y = minerPin.y + abs(sin(hookAngle / 180.0 * M_PI) * lineLen);
+				hookRect.y = minerPin.y + abs(sin(hookAngle / 180.0 * M_PI) * lineLen) - 20;
 			}
 //			printf("Y : %d    %f %f %f\n", hookRect.y, hookAngle, cos(90), sin(hookAngle) * lineLen);
 		}
@@ -291,7 +297,7 @@ int gameMain(levelInfo *level)
 				}
 			}
 
-		SDL_Delay(PRE_FRAME_TICKS - (SDL_GetTicks() - startTime));
+		//SDL_Delay(PRE_FRAME_TICKS - (SDL_GetTicks() - startTime));
 	}
 
 	for(int i = 0; i < level->totalRes; i++) {
@@ -328,8 +334,6 @@ int startGame()
 			break;
 		}
 		setGoal(lvl->levelGoal);
-//		SDL_RenderClear(winRenderer);
-		//printf("Here\n");
 		if(gameMain(lvl) <= lvl->levelGoal) {
 			gameOver(win);
 			break;
@@ -338,4 +342,5 @@ int startGame()
 	}
 	return 1;
 }
+
 

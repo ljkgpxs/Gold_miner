@@ -1,6 +1,12 @@
 #include "common.h"
 #include "resProperties.h"
 
+#define ID_DIAMOND_ALW	0.7
+#define ID_BSTONE_ALW	1.0
+#define ID_SSTONE_ALW	1.0
+#define ID_BAG_ALW	1.5
+#define ID_GOLD_ALW	2.0
+
 float resProperties::getAlw()
 {
 	return alw;
@@ -21,27 +27,27 @@ void resProperties::setId(int resId)
 	id = resId;
 	switch(id) {
 	case ID_BSTONE:
-		alw = 1.0;
+		alw = ID_GOLD_ALW;
 		weight = 5;
 		score = 22;
 		break;
 	case ID_GOLD:
-		alw = 1.0;
+		alw = ID_GOLD_ALW;
 		weight = 5;
 		score = 500;
 		break;
 	case ID_SSTONE:
-		alw = 2.0;
+		alw = ID_SSTONE_ALW;
 		weight = 4;
 		score = 11;
 		break;
 	case ID_DIAMOND:
-		alw = 3.0;
+		alw = ID_DIAMOND_ALW;
 		weight = 1;
 		score = 600;
 		break;
 	case ID_BAG:
-		alw = 1.5;
+		alw = ID_BAG_ALW;
 		weight = 3;
 		score = 450;
 		break;
@@ -63,20 +69,21 @@ float getAlw(int resId)
 	float alw = 0;
 	switch(resId) {
 	case ID_BSTONE:
-		alw = 1.0;
+		alw = ID_BSTONE_ALW;
 		break;
 	case ID_GOLD:
-		alw = 1.0;
+		alw = ID_GOLD_ALW;
 		break;
 	case ID_SSTONE:
-		alw = 2.0;
+		alw = ID_SSTONE_ALW;
 		break;
 	case ID_DIAMOND:
-		alw = 3.0;
+		alw = ID_DIAMOND_ALW;
 		break;
 	case ID_BAG:
-		alw = 1.5;
+		alw = ID_BAG_ALW;
 		break;
 	}
 	return alw;
 }
+
