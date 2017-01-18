@@ -1,9 +1,9 @@
 #include "common.h"
 #include "resProperties.h"
 
-#define ID_DIAMOND_ALW	0.7
+#define ID_DIAMOND_ALW	1.5
 #define ID_BSTONE_ALW	1.0
-#define ID_SSTONE_ALW	1.0
+#define ID_SSTONE_ALW	1.1
 #define ID_BAG_ALW	1.5
 #define ID_GOLD_ALW	2.0
 
