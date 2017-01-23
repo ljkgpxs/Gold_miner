@@ -38,7 +38,7 @@ void resProperties::setId(int resId)
 		break;
 	case ID_SSTONE:
 		alw = ID_SSTONE_ALW;
-		weight = 4;
+		weight = 3;
 		score = 11;
 		break;
 	case ID_DIAMOND:
